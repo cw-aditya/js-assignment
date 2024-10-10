@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Js Assignment</title>
+    <link rel="stylesheet" href="index.css" />
+
+    <style>
+      .selectors {
+        height: 50vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .group {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .selector {
+        width: 100px;
+        height: 50px;
+        background: #2aa2d6;
+        font-size: larger;
+        color: white;
+      }
+
+      .selector-active {
+        background: #144f68;
+      }
+
+      .options {
+        height: 50vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .option {
+        width: 150px;
+        height: 100px;
+        background: #68d2ff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: larger;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="selectors" id="selectors"></div>
+    <div class="options" id="options"></div>
+    <script>
+      const DATA = [
+        {
+          body: "cruiser",
+          power: "150cc",
+          seater: "7 seater",
+        },
+        {
+          body: "retro",
+          power: "200cc",
+          seater: "5 seater",
+        },
+        {
+          body: "retro",
+          power: "150cc",
+          seater: "2 seater",
+        },
+        {
+          body: "cruiser",
+          power: "150cc",
+          seater: "2 seater",
+        },
+        {
+          body: "cruiser",
+          power: "300cc",
+          seater: "3 seater",
+        },
+        {
+          body: "sports",
+          power: "150cc",
+          seater: "5 seater",
+        },
+        {
+          body: "retro",
+          power: "300cc",
+          seater: "3 seater",
+        },
+        {
+          body: "classic",
+          power: "200cc",
+          seater: "3 seater",
+        },
+      ];
+
+      let FilterdData = [];
+
+      const GroupOneSelector = new Set(DATA.map((obj) => obj.body));
+      const GroupTwoSelector = new Set(DATA.map((obj) => obj.power));
+      const GroupThreeSelector = new Set(DATA.map((obj) => obj.seater));
+
+      let selectedValues = {
+        body: [],
+        power: [],
+        seater: [],
+      };
+
+      function getOptionString({ body, power, seater }) {
+        return `
+    <div class="option">
+      ${body}
+      <br>
+      ${power}
+      <br>
+      ${seater}
+    </div>
+    `;
+      }
+
+      function renderOptions(options) {
+        let optionsDiv = document.getElementById("options");
+
+        let innerHTML = "";
+        options.map((opt) => {
+          innerHTML += getOptionString(opt);
+        });
+
+        optionsDiv.innerHTML = innerHTML;
+      }
+
+      function getSelectorString(name, id) {
+        return `
+  <button class="selector" id="${id}-${name}" onClick="handleSelectorToggle('${name}', '${id}')">${name}</button>
+  `;
+      }
+
+      function renderSelectorByGroup(group, groupId) {
+        let groupDiv = document.getElementById(groupId);
+        let innerHTML = "";
+        group.forEach((grp) => {
+          innerHTML += getSelectorString(grp, groupId);
+        });
+
+        groupDiv.innerHTML += innerHTML;
+      }
+
+      function checkIfAllSelectorsEmpty() {
+        return (
+          selectedValues["body"].length < 1 &&
+          selectedValues["power"].length < 1 &&
+          selectedValues["seater"].length < 1
+        );
+      }
+
+      function updateOptions() {
+        if (checkIfAllSelectorsEmpty()) {
+          FilterdData = DATA;
+          return;
+        }
+        FilterdData = DATA.filter((datum) => {
+          // For each group check if any one is select by checking the length.
+          // If doesn't ignore and return true for that group.
+          //  If exists one, then check whether selectValues includes that value or not 
+          return (
+
+            (selectedValues["body"].length < 1 ||
+              selectedValues["body"].includes(datum.body)) &&
+            (selectedValues["power"].length < 1 ||
+              selectedValues["power"].includes(datum.power)) &&
+            (selectedValues["seater"].length < 1 ||
+              selectedValues["seater"].includes(datum.seater))
+          );
+        });
+      }
+
+      function handleSelectorToggle(name, id) {
+        console.log(name, id);
+        let updatedSelections = selectedValues[id];
+        if (updatedSelections.includes(name)) {
+          updatedSelections = updatedSelections.filter((n) => n != name);
+          document
+            .getElementById(`${id}-${name}`)
+            .classList.remove("selector-active");
+        } else {
+          updatedSelections.push(name);
+          document
+            .getElementById(`${id}-${name}`)
+            .classList.add("selector-active");
+        }
+        selectedValues[id] = updatedSelections;
+        updateOptions();
+        renderOptions(FilterdData);
+      }
+
+      function initializeGroupDivs() {
+        allSelectorsDiv = document.getElementById("selectors");
+        let innerHTML = "";
+        Object.keys(DATA[0]).forEach((key) => {
+          innerHTML += `<div class="group" id="${key}"></div>`;
+        });
+        allSelectorsDiv.innerHTML = innerHTML;
+      }
+
+      // Add div for each key in Data object
+      initializeGroupDivs();
+
+      // Initially render all data
+      renderOptions(DATA);
+      // Add selet button for each group
+      renderSelectorByGroup(GroupOneSelector, "body");
+      renderSelectorByGroup(GroupTwoSelector, "power");
+      renderSelectorByGroup(GroupThreeSelector, "seater");
+    </script>
+  </body>
+</html>
